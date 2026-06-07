@@ -1,4 +1,6 @@
 """
+Note: Claude wrote this code for me.
+
 process_names.py
 
 Reads all SSA baby name files (yob1880.txt through yob2025.txt) and
@@ -44,7 +46,7 @@ import json
 # Folder containing your yobYYYY.txt files.
 # "." means the same directory as this script.
 # Change this if your files are in a subfolder, e.g. "names" or "data/ssa".
-DATA_DIR = "."
+DATA_DIR = "national-data"
 
 # Year range to process. Adjust if you ever get updated files.
 FIRST_YEAR = 1880

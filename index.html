@@ -284,8 +284,6 @@ function weightedPick(pairs) {
 const CURRENT_YEAR = new Date.getFullYear(); // update this if you redeploy in a future year
 const MIN_YEAR = 1880;
 const MAX_YEAR = 2025;
-const MIN_AGE = CURRENT_YEAR - MAX_YEAR;
-const MAX_AGE = CURRENT_YEAR - MIN_YEAR;
 
 document.getElementById("pickBtn").addEventListener("click", pickName);
 
@@ -308,7 +306,7 @@ function pickName() {
     }
   } else if (ageVal !== "") {
     const age = parseInt(ageVal, 10);
-    if (isNaN(age) || age < MIN_AGE || age > MAX_AGE) {
+    if (isNaN(age) || age < 0 || age > 145) {
       setStatus("Age must be between 0 and 145.", true);
       return;
     }

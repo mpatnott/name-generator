@@ -308,8 +308,12 @@ function pickName() {
     }
   } else if (ageVal !== "") {
     const age = parseInt(ageVal, 10);
+    if (isNaN(age) || age < MIN_AGE || age > MAX_AGE) {
+      setStatus("Age must be between 0 and 145.", true);
+      return;
+    }
     birthYear = CURRENT_YEAR - age;
-    if (isNaN(age) || birthYear < MIN_YEAR || birthYear > MAX_YEAR) {
+    if (birthYear < MIN_YEAR || birthYear > MAX_YEAR) {
       setStatus(`That age corresponds to birth year ${birthYear}, which is outside our data range (${MIN_YEAR}–${MAX_YEAR}).`, true);
       return;
     }

@@ -181,11 +181,11 @@
   <div class="input-row">
     <div class="form-group">
       <label for="yearInput">Birth Year</label>
-      <input type="number" id="yearInput" placeholder="e.g. 1990" />
+      <input type="number" id="yearInput" placeholder="e.g. 1990" min="1880" max="2025"/>
     </div>
     <div class="form-group">
       <label for="ageInput">— or Age —</label>
-      <input type="number" id="ageInput" placeholder="e.g. 34"" />
+      <input type="number" id="ageInput" placeholder="e.g. 34"" min="1" max="146"/>
     </div>
   </div>
   <p class="hint">Enter a birth year or an age. If you enter both, birth year takes precedence.</p>
@@ -288,20 +288,6 @@ const MIN_AGE = CURRENT_YEAR - MAX_YEAR;
 const MAX_AGE = CURRENT_YEAR - MIN_YEAR;
 
 document.getElementById("pickBtn").addEventListener("click", pickName);
-
-function initInputBounds() {
-  const yearInput = document.getElementById("yearInput");
-  yearInput.min = MIN_YEAR;
-  yearInput.max = MAX_YEAR;
-  yearInput.placeholder = `${MIN_YEAR}-${MAX_YEAR}`;
-
-  const ageInput = document.getElementById("ageInput");
-  ageInput.min = MIN_AGE;
-  ageInput.max = MAX_AGE;
-  ageInput.placeholder = `${MIN_AGE}-${MAX_AGE}`;
-
-  document.querySelector(".hint").textContent = `Enter a birth year (${MIN_YEAR} - ${MAX_YEAR}) or an age. If you enter both, age will be ignored.`);
-}
 
 function pickName() {
   setStatus("");

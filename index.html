@@ -170,7 +170,7 @@
 <div class="container">
 
   <h1>Name Generator</h1>
-  <p class="subtitle">Selects a name at random from all names given to at least 5 people in a given year, weighted by how common it was in that year.</p>
+  <p class="subtitle">Selects a name at random from all names given to at least 5 people in the US in a given year (according to SSA data), weighted by how common it was in that year.</p>
 
   <!-- Animated bar shown while names_data.json is loading -->
   <div class="loading-bar visible" id="loadingBar">
@@ -281,7 +281,7 @@ function weightedPick(pairs) {
 
 // ─── Input handling ──────────────────────────────────────────────────────────
 
-const CURRENT_YEAR = 2026; // update this if you redeploy in a future year
+const CURRENT_YEAR = new Date.getFullYear();
 const MIN_YEAR = 1880;
 const MAX_YEAR = 2025;
 

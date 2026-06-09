@@ -170,7 +170,7 @@
 <div class="container">
 
   <h1>Name Generator</h1>
-  <p class="subtitle">Randomly selects a name at random. Names are pulled from US SSA data for the entered year/age, and the probability of selection is weighted bsaed on how common a name was that year.</p>
+  <p class="subtitle">Randomly selects a name. Names are pulled from US SSA data for the entered year/age, and the probability of selection is weighted bsaed on how common a name was that year.</p>
 
   <!-- Animated bar shown while names_data.json is loading -->
   <div class="loading-bar visible" id="loadingBar">
@@ -306,8 +306,8 @@ function pickName() {
     }
   } else if (ageVal !== "") {
     const age = parseInt(ageVal, 10);
-    if (isNaN(age) || age < 0 || age > 145) {
-      setStatus("Age must be between 0 and 145.", true);
+    if (isNaN(age)) {
+      setStatus("Age must be a number.", true);
       return;
     }
     birthYear = CURRENT_YEAR - age;

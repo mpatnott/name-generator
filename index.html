@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Name Picker</title>
+  <style>
+    /* --- Reset & base --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f7f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* --- Layout --- */
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: normal;
+      letter-spacing: 0.01em;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    /* --- Form --- */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      margin-bottom: 0.4rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .input-row .form-group {
+      flex: 1;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      background: #fff;
+      color: #1a1a1a;
+      appearance: none;
+    }
+
+    input[type="number"]:focus, select:focus {
+      outline: 2px solid #1a1a1a;
+      outline-offset: 1px;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.3rem;
+    }
+
+    /* --- Button --- */
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      font-family: inherit;
+      font-size: 1rem;
+      background: #1a1a1a;
+      color: #f7f5f0;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.15s;
+    }
+
+    button:hover:not(:disabled) { background: #333; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* --- Result --- */
+    .result {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      text-align: center;
+      display: none; /* hidden until a result is ready */
+    }
+
+    .result.visible { display: block; }
+
+    .result-name {
+      font-size: 2.5rem;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .result-meta {
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    /* --- Status messages --- */
+    .status {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #555;
+      min-height: 1.25em;
+      text-align: center;
+    }
+
+    .status.error { color: #b00; }
+
+    /* --- Loading indicator shown while JSON loads --- */
+    .loading-bar {
+      width: 100%;
+      height: 3px;
+      background: #ddd;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      display: none;
+    }
+
+    .loading-bar.visible { display: block; }
+
+    .loading-bar-inner {
+      height: 100%;
+      width: 30%;
+      background: #1a1a1a;
+      border-radius: 2px;
+      animation: slide 1.2s ease-in-out infinite;
+    }
+
+    @keyframes slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Name Picker</h1>
+  <p class="subtitle">Picks a name at random, weighted by how common it was in a given year.</p>
+
+  <!-- Animated bar shown while names_data.json is loading -->
+  <div class="loading-bar visible" id="loadingBar">
+    <div class="loading-bar-inner"></div>
+  </div>
+
+  <!-- Year / Age inputs side by side -->
+  <div class="input-row">
+    <div class="form-group">
+      <label for="yearInput">Birth Year</label>
+      <input type="number" id="yearInput" placeholder="e.g. 1990" min="1880" max="2025" />
+    </div>
+    <div class="form-group">
+      <label for="ageInput">— or Age —</label>
+      <input type="number" id="ageInput" placeholder="e.g. 34" min="0" max="145" />
+    </div>
+  </div>
+  <p class="hint">Enter a birth year (1880–2025) or an age. If you enter both, birth year takes precedence.</p>
+
+  <!-- Gender selector -->
+  <div class="form-group" style="margin-top: 1rem;">
+    <label for="genderSelect">Gender</label>
+    <select id="genderSelect">
+      <option value="">Either (50/50)</option>
+      <option value="F">Female</option>
+      <option value="M">Male</option>
+    </select>
+  </div>
+
+  <!-- Pick button, disabled until data is loaded -->
+  <button id="pickBtn" disabled>Loading data…</button>
+
+  <!-- Status line (validation errors, etc.) -->
+  <p class="status" id="status"></p>
+
+  <!-- Result panel, hidden until a pick is made -->
+  <div class="result" id="result">
+    <div class="result-name" id="resultName"></div>
+    <div class="result-meta" id="resultMeta"></div>
+  </div>
+
+</div>
+
+<script>
+// ─── Data loading ────────────────────────────────────────────────────────────
+
+// namesData will hold the parsed JSON once it loads.
+// Structure: { "1990": { "F": [["Emma", 20355], ...], "M": [...] }, ... }
+let namesData = null;
+
+// Fetch names_data.json from the same directory as index.html.
+// GitHub Pages serves both files from the same repo root.
+fetch("names_data.json")
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Could not load names_data.json (HTTP ${response.status})`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    namesData = data;
+    document.getElementById("loadingBar").classList.remove("visible");
+    document.getElementById("pickBtn").disabled = false;
+    document.getElementById("pickBtn").textContent = "Pick a name";
+  })
+  .catch(err => {
+    document.getElementById("loadingBar").classList.remove("visible");
+    setStatus("Failed to load name data: " + err.message, true);
+  });
+
+
+// ─── Weighted random selection ───────────────────────────────────────────────
+
+/**
+ * Given an array of [name, count] pairs, picks one name with probability
+ * proportional to count.
+ *
+ * How it works:
+ *   1. Sum all counts to get a total.
+ *   2. Pick a random integer from 0 to total - 1.
+ *   3. Walk through the list, subtracting each count from the random number
+ *      until we go below zero — that's the winner.
+ *
+ * Example: [["A", 3], ["B", 1], ["C", 6]] → total 10
+ *   A wins if random is 0–2 (30% chance)
+ *   B wins if random is 3   (10% chance)
+ *   C wins if random is 4–9 (60% chance)
+ */
+function weightedPick(pairs) {
+  // Calculate the total count across all names.
+  const total = pairs.reduce((sum, [, count]) => sum + count, 0);
+
+  // Pick a random integer in [0, total).
+  // Math.random() returns a float in [0, 1), so multiplying and flooring
+  // gives us a uniform integer in [0, total).
+  let pick = Math.floor(Math.random() * total);
+
+  // Walk the list and find which name our random number lands in.
+  for (const [name, count] of pairs) {
+    pick -= count;
+    if (pick < 0) return name;
+  }
+
+  // Fallback: return the last name (shouldn't normally be reached).
+  return pairs[pairs.length - 1][0];
+}
+
+
+// ─── Input handling ──────────────────────────────────────────────────────────
+
+const CURRENT_YEAR = 2026; // update this if you redeploy in a future year
+const MIN_YEAR = 1880;
+const MAX_YEAR = 2025;
+
+document.getElementById("pickBtn").addEventListener("click", pickName);
+
+function pickName() {
+  setStatus("");
+  hideResult();
+
+  // --- Resolve birth year ---
+  const yearVal = document.getElementById("yearInput").value.trim();
+  const ageVal  = document.getElementById("ageInput").value.trim();
+
+  let birthYear;
+
+  if (yearVal !== "") {
+    // Birth year takes precedence over age if both are filled in.
+    birthYear = parseInt(yearVal, 10);
+    if (isNaN(birthYear) || birthYear < MIN_YEAR || birthYear > MAX_YEAR) {
+      setStatus(`Birth year must be between ${MIN_YEAR} and ${MAX_YEAR}.`, true);
+      return;
+    }
+  } else if (ageVal !== "") {
+    const age = parseInt(ageVal, 10);
+    if (isNaN(age) || age < 0 || age > 145) {
+      setStatus("Age must be between 0 and 145.", true);
+      return;
+    }
+    birthYear = CURRENT_YEAR - age;
+    if (birthYear < MIN_YEAR || birthYear > MAX_YEAR) {
+      setStatus(`That age corresponds to birth year ${birthYear}, which is outside our data range (${MIN_YEAR}–${MAX_YEAR}).`, true);
+      return;
+    }
+  } else {
+    setStatus("Please enter a birth year or an age.", true);
+    return;
+  }
+
+  // --- Resolve gender ---
+  const genderSelect = document.getElementById("genderSelect").value; // "M", "F", or ""
+  let gender;
+
+  if (genderSelect === "") {
+    // No gender specified: 50/50 coin flip.
+    gender = Math.random() < 0.5 ? "F" : "M";
+  } else {
+    gender = genderSelect;
+  }
+
+  // --- Look up the name list ---
+  const yearKey = String(birthYear);
+
+  if (!namesData || !namesData[yearKey]) {
+    setStatus(`No data found for ${birthYear}. This shouldn't happen — check that names_data.json loaded correctly.`, true);
+    return;
+  }
+
+  const namePairs = namesData[yearKey][gender];
+
+  if (!namePairs || namePairs.length === 0) {
+    setStatus(`No ${gender === "F" ? "female" : "male"} names found for ${birthYear}.`, true);
+    return;
+  }
+
+  // --- Pick a name ---
+  const chosenName = weightedPick(namePairs);
+  const genderLabel = gender === "F" ? "Female" : "Male";
+
+  showResult(chosenName, `${genderLabel} · Born ${birthYear}`);
+}
+
+
+// ─── UI helpers ──────────────────────────────────────────────────────────────
+
+function setStatus(message, isError = false) {
+  const el = document.getElementById("status");
+  el.textContent = message;
+  el.className = "status" + (isError ? " error" : "");
+}
+
+function showResult(name, meta) {
+  document.getElementById("resultName").textContent = name;
+  document.getElementById("resultMeta").textContent = meta;
+  document.getElementById("result").classList.add("visible");
+}
+
+function hideResult() {
+  document.getElementById("result").classList.remove("visible");
+}
+</script>
+</body>
+</html>

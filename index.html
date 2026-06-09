@@ -170,7 +170,7 @@
 <div class="container">
 
   <h1>Name Generator</h1>
-  <p class="subtitle">Randomly selects a name. Names are pulled from US SSA data for the entered year/age, and the probability of selection is weighted bsaed on how common a name was that year.</p>
+  <p class="subtitle">Randomly selects a name from US SSA data for the entered year/age, and the probability of selection is weighted bsaed on how common a name was that year.</p>
 
   <!-- Animated bar shown while names_data.json is loading -->
   <div class="loading-bar visible" id="loadingBar">
@@ -302,8 +302,6 @@ function initInputBounds() {
 
   document.querySelector(".hint").textContent = `Enter a birth year (${MIN_YEAR} - ${MAX_YEAR}) or an age. If you enter both, age will be ignored.`);
 }
-
-initInputBounds();
 
 function pickName() {
   setStatus("");

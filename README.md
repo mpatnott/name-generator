@@ -1,2 +1,4 @@
 # name-generator
 Random name generator. Input a year or age, and optionally a gender, and the name generator selects a name from the SSA data for the appropriate year. The probability a name is chosen is based on its popularity in that year.
+
+June 2026: In the interest of transparency, I used Claude Sonnet 3.6 to build this name generator. I described what I wanted the generator to be able to do, and selected from options it provided for app type. It wrote the code for process_names.py and the original version of index.html. I read through process_names.py and ran it in a codepsace with only one trivial modification, since it did what I wanted it to do. I've read through index.html and made some adjustments to correct minor errors and to better align with my anticipated use of the app; I intend to make further adjustments in the future. I am responsible for the resulting app.
